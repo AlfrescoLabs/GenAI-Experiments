@@ -1,0 +1,15 @@
+[General]
+;Currently supported LLM providers are chatgpt and genai.
+LLM: genai
+
+[GenAI]
+URL: http://localhost:8504/query
+
+[OpenAI]
+APIKey: api-key-goes-here
+Model: gpt-3.5-turbo-16k
+
+[Alfresco]
+URL: http://localhost:8080/alfresco
+Username: admin
+Password: admin
