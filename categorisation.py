@@ -127,11 +127,12 @@ for path, _, documents in os.walk('corpuses'):
 
 all_categories = Counter()
 random.shuffle(document_paths)
-for document_path in document_paths:
+# Just generate the category hierarchy from a sample of the documents.
+for document_path in document_paths[:100]:
     document = read_document(document_path)
     question = 'Please give a list of thirty hashtags for the following document:\n\n' + document[:1000]
     try:
-        response = ask_question(question, llm, True)
+        response = ask_question(question, llm)
     except:
         continue
     categories = [re.split(r'[^a-zA-Z0-9]', line.strip())[0] for line in response.split('#')[1:-1]]
@@ -161,10 +162,6 @@ for i, category in enumerate(categories_list):
     response = response.strip().strip('.')
     mappings[category] = response
     topic_count[response] += 1
-    #reused_topics = [topic_count[0] for topic_count in topic_count.most_common() if topic_count[1] > 2]
-    #if len(reused_topics) > 1:
-    #    additional_text = ' Consider replying with something from the following list: ' + ', '.join(reused_topics)
-    #print(category, '#', response, topic_count[response], f'{i}/{len(categories_list)}')
 
 root_categories = []
 hierarchy = {}
