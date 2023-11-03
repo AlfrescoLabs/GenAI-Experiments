@@ -1,0 +1,29 @@
+Alfresco offers Elasticsearch as an alternative to Solr
+For many years Formica is a loyal partner of both Alfresco and Elastic. We are pleased to share our point of view.
+
+
+April 21, 2021 - by Bart Eynatten
+Alfresco offers Elasticsearch as an alternative to Solr
+Although Solr remains supported, the new Alfresco Content Services (ACS) release 7 offers Elasticsearch as an alternative to Solr.
+
+This opens some interesting possibilities for companies and organizations that already invested in Elasticsearch:
+
+Since Solr is not required any more in the future, the existing ELK stack infrastructure and expertise can be reused. This results in IT rationalisation and more efficient use of resources.
+Since ACS also comes with a decoupled architecture, ACS 7 can be deployed against an existing Elasticsearch cluster that already provides search and insight capabilities for other applications.
+Independently where Alfresco is deployed, the deployment of the Elastic cluster can be on premise or in the cloud (both self-managed and as managed service are possible). This allows the search indexes to be managed and scaled independently from Alfresco.
+At Formica we have experience with Solr and Elasticsearch, including App Search.
+
+We know all about how installation, setup, how configuration on synonyms, analyzers, tokenizers, filters ... and how queries are done in both Solr and Elasticsearch.
+
+Therefor, we are the ideal partner to help you move from Solr to Elasticsearch.
+
+We invite you to have a look at some of our Elastic and Alfresco reference cases:
+
+European Council
+
+Proximus
+
+IDEWE
+
+If you want to find out what value Alfresco, Elastic or the combination of Alfresco and Elastic can bring to you, contact us.
+
