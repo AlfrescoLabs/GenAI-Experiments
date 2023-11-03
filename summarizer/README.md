@@ -12,19 +12,19 @@ The project includes following components:
 
 ```
 ┌────────────────┐                                   ┌─────────────────┐
-│                │                                   │                 │
-│                │                                   │                 │
-│  Alfresco      │                                   │   GenAI         │
-│                │                                   │                 │
-└───────┬────────┘                                   └─────────▲───────┘
-        │                                                      │
-        │                                                      │
-        │ FOLDER                                               │
-        │                 ┌─────────────────┐                  │
+│                │ tcp://localhost:61616             │                 │
+│                │ (async)                           │                 │ 
+│  Alfresco      │─────────────────┐                 │   GenAI         │
+│                │                 │                 │                 │
+└───────┬────────┘                 │                 └─────────▲───────┘
+        │                          │ NODE                      │
+        │                          │                           │
+        │ FOLDER                   │                           │
+        │                 ┌────────v────────┐                  │
         │                 │                 │                  │
         └────────────────►│                 ├──────────────────┘
    http://localhost:8080  │  ai-summarizer  │  http://localhost:8506
-                          │                 │
+   (sync)                 │                 │
                           └─────────────────┘
 ```
 
@@ -52,3 +52,5 @@ Once GenAi and Alfresco are up & running, upload some documents to Alfresco `Sha
 $ cd ai-summarize
 $ java -jar target/ai-summarize-0.0.8.jar
 ```
+
+Every time a new document is uploaded to Alfresco, the summary will be updated listening to the ActiveMQ messages.

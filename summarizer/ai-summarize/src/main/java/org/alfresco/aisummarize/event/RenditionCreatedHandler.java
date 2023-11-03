@@ -46,6 +46,8 @@ public class RenditionCreatedHandler implements OnNodeCreatedEventHandler {
 
             String uuid = ((NodeResource) repoEvent.getData().getResource()).getPrimaryHierarchy().get(0);
 
+            LOG.info("Summarizing document {}", uuid);
+
             String response = null;
             try {
                 response = genAiClient.getSummary(renditionService.getRenditionContent(uuid));

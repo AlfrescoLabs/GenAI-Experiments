@@ -45,9 +45,6 @@ public class AiSummarizeApplication implements CommandLineRunner {
     RenditionService renditionService;
 
     @Autowired
-    RenditionsApi renditionsApi;
-
-    @Autowired
     NodeUpdateService nodeUpdateService;
 
     @Autowired
@@ -68,7 +65,7 @@ public class AiSummarizeApplication implements CommandLineRunner {
 
             LOG.info("Summarizing document {} ({})", entry.getEntry().getName(), uuid);
 
-            if (renditionsApi.getRendition(uuid, "pdf").getBody().getEntry().getStatus() == Rendition.StatusEnum.CREATED) {
+            if (renditionService.pdfRenditionIsCreated(uuid)) {
 
                 try {
 
@@ -87,7 +84,7 @@ public class AiSummarizeApplication implements CommandLineRunner {
             } else {
 
                 LOG.info("PDF rendition for document {} was not available, it has been requested", entry.getEntry().getName());
-                renditionsApi.createRendition(uuid, new RenditionBodyCreate().id("pdf"));
+                renditionService.createPdfRendition(uuid);
 
             }
 
