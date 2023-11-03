@@ -120,7 +120,7 @@ def read_document(document_path):
     return document
 
 document_paths = []
-for path, _, documents in os.walk('corpuses'):
+for path, _, documents in os.walk('corpus'):
     for document in documents:
         document_path = os.path.join(path, document)
         document_paths.append(document_path)
@@ -176,7 +176,7 @@ while len(to_process) > 0:
     elif mappings[topic] in processed:
         hierarchy[topic] = [item[0] for item in mappings.items() if item[1] == topic]
         processed.append(topic)
-    elif mappings[topic] not in mappings.keys():
+    elif mappings[topic] not in mappings.keys() and mappings[topic] not in root_categories and mappings[topic] not in to_process:
         # Ignore the suggested mapping and just treat as another root category.
         hierarchy[topic] = [item[0] for item in mappings.items() if item[1] == topic]
         root_categories.append(topic)
@@ -197,7 +197,7 @@ def create_categories_within(parent, created_category_ids, hierarchy):
     if parent not in hierarchy.keys():
         return
     for category in hierarchy[parent]:
-        response = requests.post(alfresco_url + '/api/-default-/public/alfresco/versions/1/categories/' + created_category_ids[parent] + '/subcategories', json={"name": category}, auth=alfresco_auth).json()
+        response = requests.post(alfresco_url + '/api/-default-/public/alfresco/versions/1/categories/' + created_category_ids[parent] + '/subcategories', json={'name': category}, auth=alfresco_auth).json()
         if 'error' in response and response['error']['statusCode'] == 409:
             response = requests.get(alfresco_url + '/api/-default-/public/alfresco/versions/1/categories/' + created_category_ids[parent] + '/subcategories', auth=alfresco_auth).json()
             created_category_ids[category] = [entry['entry']['id'] for entry in response['list']['entries'] if entry['entry']['name'] == category][0]
