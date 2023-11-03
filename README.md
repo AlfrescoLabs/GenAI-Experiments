@@ -21,3 +21,7 @@ The LLM is asked to provide categories for a sample of the documents in the repo
 ### Categorising Content
 
 The category tree is provided to the LLM along with the content of the document. The LLM is asked to select appropriate categories for the content and then the v1 API is used to assign them.
+
+### Summarizing Content
+
+Detailed instructions available in [summarizer](summarizer)
