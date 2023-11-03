@@ -9,7 +9,7 @@ services:
         depends_on: 
             - postgres  
         environment:
-            JAVA_TOOL_OPTIONS: "
+            JAVA_TOOL_OPTIONS: >-
                 -Dencryption.keystore.type=JCEKS
                 -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
                 -Dencryption.keyAlgorithm=DESede
@@ -18,8 +18,7 @@ services:
                 -Dmetadata-keystore.aliases=metadata
                 -Dmetadata-keystore.metadata.password=oKIWzVdEdA
                 -Dmetadata-keystore.metadata.algorithm=DESede
-                "
-            JAVA_OPTS : '
+            JAVA_OPTS : >-
                 -Ddb.username=alfresco
                 -Ddb.password=alfresco
                 -Ddb.driver=org.postgresql.Driver
@@ -41,8 +40,8 @@ services:
                 -Dshare.port=8080
                 -Dshare.protocol=http 
                 -Daos.baseUrlOverwrite=http://${SERVER_NAME}/alfresco/aos 
-                -Dmessaging.subsystem.autoStart=false
-                -Drepo.event2.enabled=false
+                -Dmessaging.broker.url="failover:(nio://activemq:61616)?timeout=3000&jms.useCompression=true"
+                -Drepo.event2.filter.nodeTypes="sys:*, fm:*, cm:failedThumbnail, cm:rating, rma:rmsite include_subtypes, usr:user"
                 -Ddeployment.method=DOCKER_COMPOSE
                 -Dcsrf.filter.enabled=false 
                 -Dopencmis.server.override=true
@@ -56,7 +55,6 @@ services:
                 -Dgoogledocs.enabled=false   
                 -Ddev.email.not.sent=true  
                 -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
-            '
         volumes: 
             - ./data/alf-repo-data:/usr/local/tomcat/alf_data
             - ./logs/alfresco:/usr/local/tomcat/logs    
@@ -66,7 +64,7 @@ services:
         image: alfresco/alfresco-transform-core-aio:${TRANSFORM_ENGINE_TAG}
         restart: on-failure  
         environment:
-            JAVA_OPTS: "
+            JAVA_OPTS: >-
               -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
               -Dserver.tomcat.threads.max=12
               -Dserver.tomcat.threads.min=4
@@ -80,7 +78,11 @@ services:
               -Dlogging.level.org.apache.pdfbox.pdmodel.font.PDSimpleFont=FATAL
               -Dlogging.level.org.apache.pdfbox.pdmodel.font.PDFont=FATAL
               -Dlogging.level.org.apache.pdfbox.pdmodel.font.PDCIDFont=FATAL
-            "
+
+    activemq:
+        image: alfresco/alfresco-activemq:${ACTIVEMQ_TAG}
+        ports:
+          - "61616:61616"
 
     share:
         build:
@@ -93,12 +95,10 @@ services:
             REPO_PORT: "8080"
             CSRF_FILTER_REFERER: "http://localhost:8080/.*"
             CSRF_FILTER_ORIGIN: "http://localhost:8080"
-            JAVA_OPTS: "
-                -Xms1744m -Xmx1744m
+            JAVA_OPTS: >-
                 -Dalfresco.context=alfresco
                 -Dalfresco.protocol=http
                 -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
-                "
         volumes: 
             - ./logs/share:/usr/local/tomcat/logs  
 
@@ -109,18 +109,17 @@ services:
             - POSTGRES_PASSWORD=alfresco
             - POSTGRES_USER=alfresco
             - POSTGRES_DB=alfresco
-        command: "
+        command: >-
             postgres
               -c max_connections=200
               -c logging_collector=on
               -c log_min_messages=LOG
-              -c log_directory=/var/log/postgresql"
+              -c log_directory=/var/log/postgresql
         ports:
             - 5432:5432
         volumes: 
             - ./data/postgres-data:/var/lib/postgresql/data
             - ./logs/postgres:/var/log/postgresql  
-     
 
     solr6:
         build:
@@ -141,11 +140,10 @@ services:
             SOLR_SOLR_PORT: "8983"
             #Create the default alfresco and archive cores
             SOLR_CREATE_ALFRESCO_DEFAULTS: "alfresco,archive" 
-            SOLR_OPTS: "
+            SOLR_OPTS: >-
                 -XX:-UseLargePages
                 -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
                 -Dalfresco.secureComms.secret=tx1jetmwv 
-            "
         volumes: 
             - ./data/solr-data:/opt/alfresco-search-services/data   
 

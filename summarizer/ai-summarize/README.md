@@ -1,6 +1,6 @@
 # AI Summarizer
 
-Spring Boot Command Line application that reads documents from an Alfresco folder in PDF format, gets the summary from AI and updates `cm:description` property of the document with the summary. It also set a tag with the LLM used.
+Spring Boot Command Line application that reads documents from an Alfresco folder in PDF format, gets the summary from AI and updates `cm:description` property of the document with the summary. It also sets a tag with the LLM used.
 
 # Configuration
 
@@ -16,6 +16,12 @@ content.service.path=/alfresco/api/-default-/public/alfresco/versions/1
 
 # ACS Path
 folder=/app:company_home/app:shared
+
+# ActiveMQ Server
+spring.activemq.brokerUrl=tcp://localhost:61616
+spring.jms.cache.enabled=false
+alfresco.events.enableSpringIntegration=false
+alfresco.events.enableHandlers=true
 
 # GenAI Stack
 genai.summary.url=http://localhost:8506/summary
@@ -50,3 +56,5 @@ Started AiSummarizeApplication in 1.026 seconds (process running for 1.284)
 Summarizing document 日本.pdf (089b75ba-9f1b-49a1-ac72-0b19ab249b4b)
 Document 日本.pdf has been updated with summary and tag
 ```
+
+After performing the initial action (summarize the documents inside the folder), the program will be listening to `CREATE` events from Alfresco Repository (ActiveMQ). Every new document in the repository will be *summarized* automatically by using the messaging API.

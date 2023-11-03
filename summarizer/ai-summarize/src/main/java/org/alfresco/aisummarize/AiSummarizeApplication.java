@@ -1,6 +1,8 @@
 package org.alfresco.aisummarize;
 
-import okhttp3.*;
+import org.alfresco.aisummarize.service.GenAiClient;
+import org.alfresco.aisummarize.service.NodeUpdateService;
+import org.alfresco.aisummarize.service.RenditionService;
 import org.alfresco.core.handler.NodesApi;
 import org.alfresco.core.handler.RenditionsApi;
 import org.alfresco.core.handler.TagsApi;
@@ -27,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
 public class AiSummarizeApplication implements CommandLineRunner {
@@ -37,20 +38,17 @@ public class AiSummarizeApplication implements CommandLineRunner {
     @Value("${folder}")
     String folder;
 
-    @Value("${genai.summary.url}")
-    String genaiSummaryUrl;
+    @Autowired
+    GenAiClient genAiClient;
 
-    @Value("${genai.request.timeout}")
-    Integer genaiTimeout;
+    @Autowired
+    RenditionService renditionService;
 
     @Autowired
     RenditionsApi renditionsApi;
 
     @Autowired
-    NodesApi nodesApi;
-
-    @Autowired
-    TagsApi tagsApi;
+    NodeUpdateService nodeUpdateService;
 
     @Autowired
     SearchApi searchApi;
@@ -74,21 +72,11 @@ public class AiSummarizeApplication implements CommandLineRunner {
 
                 try {
 
-                    byte[] pdfFileContent =
-                            renditionsApi.getRenditionContent(uuid, "pdf",
-                                    false, null, null, null).getBody().getContentAsByteArray();
-
-                    File pdfFile = Files.createTempFile(null, null).toFile();
-                    Files.write(pdfFile.toPath(), pdfFileContent);
-
-                    String response = getGenAiSummary(pdfFile);
+                    String response = genAiClient.getSummary(renditionService.getRenditionContent(uuid));
                     JsonParser jsonParser = JsonParserFactory.getJsonParser();
-                    Map<String, Object> responseList = jsonParser.parseMap(response);
+                    Map<String, Object> aiResponse = jsonParser.parseMap(response);
 
-                    nodesApi.updateNode(uuid,
-                            new NodeBodyUpdate().properties(Map.of("cm:description", responseList.get("result"))),
-                            null, null);
-                    tagsApi.createTagForNode(uuid, new TagBody().tag(responseList.get("model").toString()), null);
+                    nodeUpdateService.updateNode(uuid, aiResponse);
 
                     LOG.info("Document {} has been updated with summary and tag", entry.getEntry().getName());
 
@@ -104,27 +92,6 @@ public class AiSummarizeApplication implements CommandLineRunner {
             }
 
         });
-    }
-
-    private String getGenAiSummary(File pdfFile) throws IOException {
-
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(genaiTimeout, TimeUnit.SECONDS)
-                .build();
-
-        RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("file", pdfFile.getName(),
-                        RequestBody.create(MediaType.parse("application/pdf"), pdfFile))
-                .build();
-
-        Request request = new Request.Builder()
-                .url(genaiSummaryUrl)
-                .post(requestBody)
-                .build();
-
-        return client.newCall(request).execute().body().string();
-
     }
 
     public static void main(String[] args) {
