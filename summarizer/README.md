@@ -28,6 +28,15 @@ The project includes following components:
                           └─────────────────┘
 ```
 
+# Configuration
+
+[GenAI Stack](genai-stack) supports language and summary length configuration. Modify environment variables in `.env` file to specify your preferences.
+
+```
+SUMMARY_LANGUAGE=Brazilian # Any language name supported by LLM
+SUMMARY_SIZE=120 # Number of words for the summary
+```
+
 # Deploying
 
 Start GenAI service

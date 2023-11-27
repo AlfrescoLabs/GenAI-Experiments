@@ -21,6 +21,15 @@ Make sure to set the `OLLAMA_BASE_URL=http://llm:11434` in the `.env` file when 
 **Windows**
 Not supported by Ollama, so Windows users need to generate a OpenAI API key and configure the stack to use `gpt-3.5` or `gpt-4` in the `.env` file.
 
+**Summary properties**
+
+Modify environment variables in `.env` file to specify your preferences.
+
+```
+SUMMARY_LANGUAGE=Brazilian # Any language name supported by LLM
+SUMMARY_SIZE=120 # Number of words for the summary
+```
+
 # Develop
 
 > [!WARNING]
