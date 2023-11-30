@@ -3,12 +3,6 @@ package org.alfresco.aisummarize.event;
 import org.alfresco.aisummarize.service.GenAiClient;
 import org.alfresco.aisummarize.service.NodeUpdateService;
 import org.alfresco.aisummarize.service.RenditionService;
-import org.alfresco.core.handler.NodesApi;
-import org.alfresco.core.handler.RenditionsApi;
-import org.alfresco.core.handler.TagsApi;
-import org.alfresco.core.model.NodeBodyUpdate;
-import org.alfresco.core.model.RenditionBodyCreate;
-import org.alfresco.core.model.TagBody;
 import org.alfresco.event.sdk.handling.filter.EventFilter;
 import org.alfresco.event.sdk.handling.filter.NodeTypeFilter;
 import org.alfresco.event.sdk.handling.handler.OnNodeCreatedEventHandler;
@@ -27,7 +21,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @Component
-public class RenditionCreatedHandler implements OnNodeCreatedEventHandler {
+public class RenditionCreatedHandler extends AbstractCreatedHandler implements OnNodeCreatedEventHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(RenditionCreatedHandler.class);
 
@@ -44,22 +38,27 @@ public class RenditionCreatedHandler implements OnNodeCreatedEventHandler {
     public void handleEvent(final RepoEvent<DataAttributes<Resource>> repoEvent) {
         if (((NodeResource) repoEvent.getData().getResource()).getName().equals("pdf")) {
 
-            String uuid = ((NodeResource) repoEvent.getData().getResource()).getPrimaryHierarchy().get(0);
+            boolean parentFound = ((NodeResource) repoEvent.getData().getResource()).getPrimaryHierarchy().contains(folderId);
 
-            LOG.info("Summarizing document {}", uuid);
+            if (parentFound) {
 
-            String response = null;
-            try {
-                response = genAiClient.getSummary(renditionService.getRenditionContent(uuid));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                String uuid = ((NodeResource) repoEvent.getData().getResource()).getPrimaryHierarchy().get(0);
+
+                LOG.info("Summarizing document {}", uuid);
+
+                String response = null;
+                try {
+                    response = genAiClient.getSummary(renditionService.getRenditionContent(uuid));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                JsonParser jsonParser = JsonParserFactory.getJsonParser();
+                Map<String, Object> aiResponse = jsonParser.parseMap(response);
+
+                nodeUpdateService.updateNode(uuid, aiResponse);
+
+                LOG.info("Document {} has been updated with summary and tag", uuid);
             }
-            JsonParser jsonParser = JsonParserFactory.getJsonParser();
-            Map<String, Object> aiResponse = jsonParser.parseMap(response);
-
-            nodeUpdateService.updateNode(uuid, aiResponse);
-
-            LOG.info("Document {} has been updated with summary and tag", uuid);
 
         }
     }
