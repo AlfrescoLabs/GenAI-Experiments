@@ -13,7 +13,7 @@ public class AbstractCreatedHandler {
     String folderId;
 
     @Value("${folder}")
-    String folder;
+    private String folder;
 
     @Autowired
     SearchApi searchApi;

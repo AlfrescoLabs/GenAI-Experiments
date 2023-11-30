@@ -1,5 +1,7 @@
 package org.alfresco.aisummarize.event;
 
+import org.alfresco.aisummarize.event.filter.NameFilter;
+import org.alfresco.aisummarize.event.filter.ParentFolderFilter;
 import org.alfresco.aisummarize.service.GenAiClient;
 import org.alfresco.aisummarize.service.NodeUpdateService;
 import org.alfresco.aisummarize.service.RenditionService;
@@ -36,36 +38,31 @@ public class RenditionCreatedHandler extends AbstractCreatedHandler implements O
 
     @Override
     public void handleEvent(final RepoEvent<DataAttributes<Resource>> repoEvent) {
-        if (((NodeResource) repoEvent.getData().getResource()).getName().equals("pdf")) {
 
-            boolean parentFound = ((NodeResource) repoEvent.getData().getResource()).getPrimaryHierarchy().contains(folderId);
+        String uuid = ((NodeResource) repoEvent.getData().getResource()).getPrimaryHierarchy().get(0);
 
-            if (parentFound) {
+        LOG.info("Summarizing document {}", uuid);
 
-                String uuid = ((NodeResource) repoEvent.getData().getResource()).getPrimaryHierarchy().get(0);
-
-                LOG.info("Summarizing document {}", uuid);
-
-                String response = null;
-                try {
-                    response = genAiClient.getSummary(renditionService.getRenditionContent(uuid));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                JsonParser jsonParser = JsonParserFactory.getJsonParser();
-                Map<String, Object> aiResponse = jsonParser.parseMap(response);
-
-                nodeUpdateService.updateNode(uuid, aiResponse);
-
-                LOG.info("Document {} has been updated with summary and tag", uuid);
-            }
-
+        String response = null;
+        try {
+            response = genAiClient.getSummary(renditionService.getRenditionContent(uuid));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        JsonParser jsonParser = JsonParserFactory.getJsonParser();
+        Map<String, Object> aiResponse = jsonParser.parseMap(response);
+
+        nodeUpdateService.updateNode(uuid, aiResponse);
+
+        LOG.info("Document {} has been updated with summary and tag", uuid);
+
     }
 
     @Override
     public EventFilter getEventFilter() {
-        return NodeTypeFilter.of("cm:thumbnail");
+        return ParentFolderFilter.of(folderId)
+                .and(NodeTypeFilter.of("cm:thumbnail"))
+                .and(NameFilter.of("pdf"));
     }
 
 }
