@@ -35,7 +35,7 @@ public class AiSummarizeApplication implements CommandLineRunner {
 
     static final Logger LOG = LoggerFactory.getLogger(AiSummarizeApplication.class);
 
-    @Value("${folder}")
+    @Value("${content.service.folder}")
     String folder;
 
     @Autowired

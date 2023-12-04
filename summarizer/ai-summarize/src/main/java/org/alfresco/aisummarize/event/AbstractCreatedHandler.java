@@ -12,7 +12,7 @@ public class AbstractCreatedHandler {
 
     String folderId;
 
-    @Value("${folder}")
+    @Value("${content.service.folder}")
     private String folder;
 
     @Autowired
