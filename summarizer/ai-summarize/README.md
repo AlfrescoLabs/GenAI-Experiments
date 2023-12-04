@@ -1,6 +1,6 @@
 # AI Summarizer
 
-Spring Boot Command Line application that reads documents from an Alfresco folder in PDF format, gets the summary from AI and updates `cm:description` property of the document with the summary. It also sets a tag with the LLM used.
+Spring Boot Command Line application that reads documents from an Alfresco folder in PDF format, gets the summary from AI and updates `cm:description` property of the document with the summary. The Alfresco Repository property to populate with the summary (`cm:description` by default) can be configured using `content.service.summary.property` property in [configuration file](src/main/resources/application.properties). This app also sets a tag with the LLM used.
 
 # Configuration
 
