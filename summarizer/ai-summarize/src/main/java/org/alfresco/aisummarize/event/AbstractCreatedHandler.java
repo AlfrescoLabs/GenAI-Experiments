@@ -8,6 +8,8 @@ import org.alfresco.search.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.Objects;
+
 public class AbstractCreatedHandler {
 
     String folderId;
@@ -21,10 +23,10 @@ public class AbstractCreatedHandler {
     @PostConstruct
     public void init() {
         ResultSetRowEntry folderEntry =
-                searchApi.search(
+                Objects.requireNonNull(searchApi.search(
                                 new SearchRequest().query(
                                         new RequestQuery().query("PATH:'" + folder + "'")))
-                        .getBody().getList().getEntries().get(0);
+                        .getBody()).getList().getEntries().get(0);
         folderId = folderEntry.getEntry().getId();
     }
 

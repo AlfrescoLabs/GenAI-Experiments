@@ -3,13 +3,6 @@ package org.alfresco.aisummarize;
 import org.alfresco.aisummarize.service.GenAiClient;
 import org.alfresco.aisummarize.service.NodeUpdateService;
 import org.alfresco.aisummarize.service.RenditionService;
-import org.alfresco.core.handler.NodesApi;
-import org.alfresco.core.handler.RenditionsApi;
-import org.alfresco.core.handler.TagsApi;
-import org.alfresco.core.model.NodeBodyUpdate;
-import org.alfresco.core.model.Rendition;
-import org.alfresco.core.model.RenditionBodyCreate;
-import org.alfresco.core.model.TagBody;
 import org.alfresco.search.handler.SearchApi;
 import org.alfresco.search.model.RequestQuery;
 import org.alfresco.search.model.ResultSetPaging;
@@ -25,10 +18,9 @@ import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.http.ResponseEntity;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Map;
+import java.util.Objects;
 
 @SpringBootApplication
 public class AiSummarizeApplication implements CommandLineRunner {
@@ -51,7 +43,7 @@ public class AiSummarizeApplication implements CommandLineRunner {
     SearchApi searchApi;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
 
         ResponseEntity<ResultSetPaging> results = searchApi.search(
                 new SearchRequest()
@@ -59,7 +51,7 @@ public class AiSummarizeApplication implements CommandLineRunner {
                                 .language(RequestQuery.LanguageEnum.AFTS)
                                 .query("PATH:\"" + folder + "//*\"")));
 
-        results.getBody().getList().getEntries().forEach((entry) -> {
+        Objects.requireNonNull(results.getBody()).getList().getEntries().forEach((entry) -> {
 
             String uuid = entry.getEntry().getId();
 

@@ -43,7 +43,7 @@ public class RenditionCreatedHandler extends AbstractCreatedHandler implements O
 
         LOG.info("Summarizing document {}", uuid);
 
-        String response = null;
+        String response;
         try {
             response = genAiClient.getSummary(renditionService.getRenditionContent(uuid));
         } catch (IOException e) {
