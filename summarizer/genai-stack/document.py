@@ -25,19 +25,17 @@ password = os.getenv("NEO4J_PASSWORD")
 ollama_base_url = os.getenv("OLLAMA_BASE_URL")
 embedding_model_name = os.getenv("EMBEDDING_MODEL")
 llm_name = os.getenv("LLM")
-# Remapping for Langchain Neo4j integration
 os.environ["NEO4J_URL"] = url
 
 language = os.getenv("SUMMARY_LANGUAGE")
 summary_size = os.getenv("SUMMARY_SIZE")
+tags_number = os.getenv("TAGS_NUMBER")
 
 logger = get_logger(__name__)
-
 
 embeddings, dimension = load_embedding_model(
     embedding_model_name, config={"ollama_base_url": ollama_base_url}, logger=logger
 )
-
 
 class StreamHandler(BaseCallbackHandler):
     def __init__(self, container, initial_text=""):
@@ -62,24 +60,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/summary")
-async def upload(file: UploadFile):
-
+def getQa(file: UploadFile):
     pdf_reader = PdfReader(file.file)
 
     text = ""
     for page in pdf_reader.pages:
         text += page.extract_text()
 
-    # langchain_textspliter
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000, chunk_overlap=200, length_function=len
     )
 
     chunks = text_splitter.split_text(text=text)
 
-    # Store the chunks part in db (vector)
-    vectorstore = Neo4jVector.from_texts(
+    vector_store = Neo4jVector.from_texts(
         chunks,
         url=url,
         username=username,
@@ -87,15 +81,42 @@ async def upload(file: UploadFile):
         embedding=embeddings,
         index_name="pdf_bot",
         node_label="PdfBotChunk",
-        pre_delete_collection=True,  # Delete existing PDF data
+        pre_delete_collection=True,
     )
     qa = RetrievalQA.from_chain_type(
-        llm=llm, chain_type="stuff", retriever=vectorstore.as_retriever()
+        llm=llm, chain_type="stuff", retriever=vector_store.as_retriever()
     )
+    return qa
 
-    # Summarization query
-    query = "Write a short summary of the text in " + summary_size + " words only in " + language
+@app.post("/prompt")
+async def prompt(file: UploadFile, prompt: str):
 
+    qa = getQa(file)
     stream_handler = StreamHandler(st.empty())
-    result = qa.run(query, callbacks=[stream_handler])
-    return {"result": result, "model": llm_name}
+
+    prompt = (prompt + 
+              ". Write the answer only in " + language + " language. " + 
+              "Don't add any translation to the answer.")
+
+    answer = qa.run(prompt, callbacks=[stream_handler])
+    return {"answer": answer}
+
+@app.post("/summary")
+async def summary(file: UploadFile):
+
+    qa = getQa(file)
+    stream_handler = StreamHandler(st.empty())
+
+    summary_query = "Write a short summary of the text in " + summary_size + " words only in " + language
+    summary_result = qa.run(summary_query, callbacks=[stream_handler])
+
+    tags_query = ("Provide " + tags_number + " words to categorize the document in language " + language + " in a single line. " +
+                 "Use only language " + language + " for these " + tags_number + " words in the answer. " +
+                 "Don't add any explanation for the words in the answer. " + 
+                 "Don't add any note after the list of words in the answer. " +
+                 "Don't use bullets or numbers to list the words in the answer. " +
+                 "Don't add in the answer the translation of the words in a different language after the list of words. " +
+                 "Give the answer exactly as a list of " + tags_number + " words in language " + language + " separated with comma.")
+    tags_result = qa.run(tags_query, callbacks=[stream_handler])
+
+    return {"summary": summary_result, "tags": tags_result, "model": llm_name}

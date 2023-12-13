@@ -35,9 +35,9 @@ services:
     networks:
       - net
 
-  summarize:
+  document:
     build:
-      dockerfile: summarize.Dockerfile
+      dockerfile: document.Dockerfile
     volumes:
       - $PWD/embedding_model:/embedding_model
     environment:
@@ -57,6 +57,7 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - SUMMARY_LANGUAGE=${SUMMARY_LANGUAGE}
       - SUMMARY_SIZE=${SUMMARY_SIZE}
+      - TAGS_NUMBER=${TAGS_NUMBER}
     networks:
       - net
     depends_on:
@@ -64,16 +65,6 @@ services:
         condition: service_healthy
       pull-model:
         condition: service_completed_successfully
-    x-develop:
-      watch:
-        - action: rebuild
-          path: .
-          ignore:
-            - loader.py
-            - bot.py
-            - pdf_bot.py
-            - api.py
-            - front-end/
     ports:
       - 8506:8506
 

@@ -28,6 +28,7 @@ Modify environment variables in `.env` file to specify your preferences.
 ```
 SUMMARY_LANGUAGE=Brazilian # Any language name supported by LLM
 SUMMARY_SIZE=120 # Number of words for the summary
+TAGS_NUMBER=3 # Number of tags to be identified for classification
 ```
 
 # Develop
@@ -57,7 +58,7 @@ The database can be explored at http://localhost:7474.
 
 ## App - Summarizer API
 
-Endpoints: 
+Endpoints:
 
   - POST http://localhost:8506/summary
 
@@ -68,4 +69,15 @@ curl --location 'http://localhost:8506/summary' \
 --form 'file=@"/tmp/document.pdf"'
 ```
 
-Exposes the functionality to get a summary as text from a PDF file.
+Exposes the functionality to get a summary as text and a list of tags from a PDF file.
+
+  - POST http://localhost:8506/prompt
+
+Example cURL command:
+
+```bash
+curl --location 'http://localhost:8506/prompt?prompt=Question' \
+--form 'file=@"/tmp/document.pdf"'
+```
+
+Exposes the functionality to get an answer to a question from a PDF file.

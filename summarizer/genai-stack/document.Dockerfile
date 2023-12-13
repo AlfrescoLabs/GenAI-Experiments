@@ -12,10 +12,9 @@ COPY requirements.txt .
 
 RUN pip install --upgrade -r requirements.txt
 
-COPY summarize.py .
-COPY utils.py .
+COPY document.py .
 COPY chains.py .
 
 HEALTHCHECK CMD curl --fail http://localhost:8506
 
-ENTRYPOINT [ "uvicorn", "summarize:app", "--host", "0.0.0.0", "--port", "8506" ]
+ENTRYPOINT [ "uvicorn", "document:app", "--host", "0.0.0.0", "--port", "8506" ]

@@ -15,6 +15,9 @@ public class GenAiClient {
     @Value("${genai.summary.url}")
     String genaiSummaryUrl;
 
+    @Value("${genai.prompt.url}")
+    String genaiPromptUrl;
+
     @Value("${genai.request.timeout}")
     Integer genaiTimeout;
 
@@ -40,6 +43,29 @@ public class GenAiClient {
         Request request = new Request
                 .Builder()
                 .url(genaiSummaryUrl)
+                .post(requestBody)
+                .build();
+
+        return client.newCall(request).execute().body().string();
+
+    }
+
+    public String getAnswer(File pdfFile, String question) throws IOException {
+
+        RequestBody requestBody = new MultipartBody
+                .Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", pdfFile.getName(), RequestBody.create(MediaType.parse("application/pdf"), pdfFile))
+                .build();
+
+        HttpUrl httpUrl = HttpUrl.parse(genaiPromptUrl)
+                .newBuilder()
+                .addQueryParameter("prompt", question)
+                .build();
+
+        Request request = new Request
+                .Builder()
+                .url(httpUrl)
                 .post(requestBody)
                 .build();
 
