@@ -84,25 +84,6 @@ services:
         ports:
           - "61616:61616"
 
-    share:
-        build:
-          context: ./share
-          args:
-            SHARE_TAG: ${SHARE_TAG}
-            SERVER_NAME: ${SERVER_NAME}
-        environment:
-            REPO_HOST: "alfresco"
-            REPO_PORT: "8080"
-            CSRF_FILTER_REFERER: "http://localhost:8080/.*"
-            CSRF_FILTER_ORIGIN: "http://localhost:8080"
-            JAVA_OPTS: >-
-                -Dalfresco.context=alfresco
-                -Dalfresco.protocol=http
-                -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
-        volumes: 
-            - ./logs/share:/usr/local/tomcat/logs  
-
-    
     postgres:
         image: postgres:${POSTGRES_TAG}
         environment:
@@ -147,6 +128,32 @@ services:
         volumes: 
             - ./data/solr-data:/opt/alfresco-search-services/data   
 
+    share:
+        build:
+          context: ./share
+          args:
+            SHARE_TAG: ${SHARE_TAG}
+            SERVER_NAME: ${SERVER_NAME}
+        environment:
+            REPO_HOST: "alfresco"
+            REPO_PORT: "8080"
+            CSRF_FILTER_REFERER: "http://localhost:8080/.*"
+            CSRF_FILTER_ORIGIN: "http://localhost:8080"
+            JAVA_OPTS: >-
+                -Dalfresco.context=alfresco
+                -Dalfresco.protocol=http
+                -XX:MinRAMPercentage=50 -XX:MaxRAMPercentage=80
+        volumes: 
+            - ./logs/share:/usr/local/tomcat/logs
+
+    content-app:
+        image: alfresco/alfresco-content-app:${ACA_TAG}
+        mem_limit: 256m
+        environment:
+            APP_BASE_SHARE_URL: "http://${SERVER_NAME}:<%=port%>/#/preview/s"
+        depends_on:
+            - alfresco            
+    
     proxy:
         image: nginx:stable-alpine
         mem_limit: 128m
@@ -157,13 +164,3 @@ services:
             - ./config/nginx.conf:/etc/nginx/nginx.conf
         ports:
             - 8080:8080
-
-    
-
-    
-
-    
-
-    
-
-
