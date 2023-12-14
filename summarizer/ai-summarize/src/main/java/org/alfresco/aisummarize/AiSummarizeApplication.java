@@ -23,13 +23,10 @@ import java.util.Map;
 import java.util.Objects;
 
 @SpringBootApplication
-public class AiSummarizeApplication implements CommandLineRunner {
+public class AiSummarizeApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(AiSummarizeApplication.class, args);
     }
-
-    @Override
-    public void run(String... args) {}
 
 }
